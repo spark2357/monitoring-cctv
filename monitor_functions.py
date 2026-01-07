@@ -17,7 +17,7 @@ def capture_screen(sct, monitor):
 
 def select_area(frame, title):
     # 영역 선택
-    roi = cv2.selectROI(title, frame, fromCenter=False, showCrosshair=True)
+    roi = cv2.selectROI(title, frame, fromCenter=False, showCrosshair=False)
     cv2.destroyWindow(title)
     return roi
 

@@ -1,7 +1,7 @@
 import cv2
 import mss
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 from PIL import Image, ImageTk
 from monitor_functions import capture_screen, select_area, check_no_video
 
@@ -9,7 +9,7 @@ class CCTVApp:
     def __init__(self, root):
         self.root = root
         self.root.title("CCTV 이벤트 감지 프로그램")
-        self.root.geometry("800x600")
+        self.root.geometry("1000x600")
 
         self.sct = mss.mss()
         self.monitor = self.sct.monitors[-1]
@@ -34,14 +34,20 @@ class CCTVApp:
         # GUI 버튼 / 왼쪽 위
         button_frame = tk.Frame(left_frame)
         button_frame.pack(side="top", pady=5, fill="both")
-        tk.Button(button_frame, text="감시 영역 선택", command=self.select_event_roi).pack(side="left", padx=5)
-        tk.Button(button_frame, text="시간 영역 선택", command=self.select_time_roi).pack(side="left", padx=5)
-        tk.Button(button_frame, text="모니터링 시작", command=self.start_monitoring).pack(side="left", padx=5)
-        tk.Button(button_frame, text="모니터링 종료", command=self.stop_monitoring, fg="red").pack(side="left", padx=5)
+        tk.Button(button_frame, text="감시 영역 선택", command=self.select_event_roi, font=("맑은 고딕", 13)).pack(side="top", pady=5)
+        tk.Button(button_frame, text="시간 영역 선택", command=self.select_time_roi, font=("맑은 고딕", 13)).pack(side="top", pady=5)
+        tk.Button(button_frame, text="모니터링 시작", command=self.start_monitoring, fg="blue", font=("맑은 고딕", 13)).pack(side="top", pady=5)
+        tk.Button(button_frame, text="모니터링 종료", command=self.stop_monitoring, fg="red", font=("맑은 고딕", 13)).pack(side="top", pady=5)
+
+        horizontal_line = tk.Frame(left_frame, height=2, bg="black")
+        horizontal_line.pack(side="top", fill="x", pady=5)
 
         # 모니터링 화면 표시 영역 / 왼쪽 아래
         self.monitor_label = tk.Label(left_frame)
-        self.monitor_label.pack(side="bottom", pady=5, fill="both")
+        self.monitor_label.pack(side="top", pady=30, fill="both")
+
+        vertical_line = tk.Frame(right_frame, width=2, bg="black")
+        vertical_line.pack(side="left", fill="y")
 
         # 스크롤 가능한 이벤트 이미지 영역 / 오른쪽
         self.canvas = tk.Canvas(right_frame)
