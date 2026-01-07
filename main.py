@@ -19,6 +19,7 @@ class CCTVApp:
         self.interval = 500
         self.thresh = 25
         self.prev_gray = None
+        self.monitoring_active = False
 
         self.fx = self.fy = self.fw = self.fh = 0
         self.tx = self.ty = self.tw = self.th = 0
@@ -33,17 +34,18 @@ class CCTVApp:
         # GUI 버튼 / 왼쪽 위
         button_frame = tk.Frame(left_frame)
         button_frame.pack(side="top", pady=5, fill="both")
-        tk.Button(root, text="감시 영역 선택", command=self.select_event_roi).pack(side="left", pady=5, padx=5)
-        tk.Button(root, text="시간 영역 선택", command=self.select_time_roi).pack(side="left", pady=5, padx=5)
-        tk.Button(root, text="모니터링 시작", command=self.monitoring).pack(side="left", pady=5, padx=5)
+        tk.Button(button_frame, text="감시 영역 선택", command=self.select_event_roi).pack(side="left", padx=5)
+        tk.Button(button_frame, text="시간 영역 선택", command=self.select_time_roi).pack(side="left", padx=5)
+        tk.Button(button_frame, text="모니터링 시작", command=self.start_monitoring).pack(side="left", padx=5)
+        tk.Button(button_frame, text="모니터링 종료", command=self.stop_monitoring, fg="red").pack(side="left", padx=5)
 
         # 모니터링 화면 표시 영역 / 왼쪽 아래
         self.monitor_label = tk.Label(left_frame)
-        self.monitor_label.pack(side="bottom", pady=10, fill="both")
+        self.monitor_label.pack(side="bottom", pady=5, fill="both")
 
         # 스크롤 가능한 이벤트 이미지 영역 / 오른쪽
         self.canvas = tk.Canvas(right_frame)
-        self.scrollbar = ttk.Scrollbar(root, orient="vertical", command=self.canvas.yview)
+        self.scrollbar = ttk.Scrollbar(right_frame, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = tk.Frame(self.canvas)
 
         self.scrollable_frame.bind(
@@ -57,6 +59,12 @@ class CCTVApp:
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
+        # 마우스 휠 이벤트 연결
+        self.canvas.bind_all(
+            "<MouseWheel>",
+            lambda e: self.canvas.yview_scroll(int(-1*(e.delta/120)), "units"))
+
+
     def custom_warning(self, title, message):
         win = tk.Toplevel(self.root)
         win.title(title)
@@ -69,7 +77,7 @@ class CCTVApp:
         roi = select_area(self.frame, "감시 영역 선택")
         self.fx, self.fy, self.fw, self.fh = roi
         self.custom_warning("알림", "영역 선택 완료")
-
+        self.prev_gray = None
 
     def select_time_roi(self):
         self.frame = capture_screen(self.sct, self.monitor)
@@ -77,7 +85,18 @@ class CCTVApp:
         self.tx, self.ty, self.tw, self.th = roi
         self.custom_warning("알림", "영역 선택 완료")
 
+    def start_monitoring(self):
+        self.monitoring_active = True
+        self.monitoring()
+
+    def stop_monitoring(self):
+        self.monitoring_active = False
+
     def monitoring(self):
+
+        if not self.monitoring_active:
+            return
+
         if self.fw == 0 or self.tw == 0:
             self.custom_warning("경고", "영역을 먼저 선택하세요")
             return
